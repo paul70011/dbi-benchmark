@@ -1,13 +1,27 @@
 import java.sql.*;
+import java.util.Random;
 
 public class Benchmark {
     static final String DB_URL = "jdbc:mariadb://localhost:3306/benchmark";
     static final String USER = "root";
     static final String PASS = "root";
 
+    static final String str20 = "00000000000000000000";
+    static final String str68 = "00000000000000000000000000000000000000000000000000000000000000000000";
+    static final String str72 = "000000000000000000000000000000000000000000000000000000000000000000000000";
+
+    private static int getRandomNumberInRange(int min, int max) {
+
+        if (min == max) return min;
+
+        Random r = new Random();
+        return r.nextInt((max - min) + 1) + min;
+    }
+
     public static void clearTables(Connection conn) throws SQLException{
         System.out.println("Clearing tables...");
         Statement stmt = conn.createStatement();
+        stmt.executeQuery("DELETE FROM accounts");
         stmt.executeQuery("DELETE FROM branches");
         stmt.close();
         System.out.println("Cleared!");
@@ -15,14 +29,26 @@ public class Benchmark {
 
     public static void fillBranches(Connection conn, int n) throws SQLException{
         System.out.println("Filling branches table...");
-        String branchName = "00000000000000000000";
-        String address = "000000000000000000000000000000000000000000000000000000000000000000000000";
         PreparedStatement prep = conn.prepareStatement("INSERT INTO branches (branchid, branchname, balance, address) VALUES(?, ?, 0, ?)");
-        prep.setString(2, branchName);
-        prep.setString(3, address);
+        prep.setString(2, str20);
+        prep.setString(3, str72);
 
-        for (int i = 1; i <= n*10000; i++) {
+        for (int i = 1; i <= n; i++) {
             prep.setInt(1, i);
+            prep.execute();
+        }
+        prep.close();
+        System.out.println("Filled!");
+    }
+
+    public static void fillAccounts(Connection conn, int n) throws SQLException {
+        System.out.println("Filling accounts table...");
+        PreparedStatement prep = conn.prepareStatement("INSERT INTO accounts (accid, name, balance, branchid, address) VALUES(?, ?, 0, ?, ?)");
+        prep.setString(2, str20); // name
+        prep.setString(4, str68); // address
+        for (int i = 1; i <= n * 100000; i++) {
+            prep.setInt(1, i); // accid
+            prep.setInt(3, getRandomNumberInRange(1, n)); // branchid
             prep.execute();
         }
         prep.close();
@@ -41,8 +67,12 @@ public class Benchmark {
         try(Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);) {
             System.out.println("Connected!");
             clearTables(conn);
+
             long start = System.currentTimeMillis();
+
             fillBranches(conn, n);
+            fillAccounts(conn, n);
+
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;
             System.out.println("Time: " + timeElapsed/1000.0d + "s");
