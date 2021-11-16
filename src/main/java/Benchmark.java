@@ -1,3 +1,5 @@
+package dbi;
+
 import java.sql.*;
 import java.util.Random;
 
