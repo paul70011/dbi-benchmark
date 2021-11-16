@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Benchmark {
     static final String DB_URL = "jdbc:mariadb://localhost:3306/benchmark";
@@ -26,7 +27,29 @@ public class Benchmark {
             prep.execute();
         }
         prep.close();
-        System.out.println("Filled!");
+        System.out.println("Branches Filled!");
+    }
+
+    public static void fillTellers(Connection conn, int n) throws SQLException{
+        System.out.println("Filling tellers table...");
+        String tellername = "00000000000";
+        String balance = "0";
+        String address = "000";
+
+
+
+        PreparedStatement prep = conn.prepareStatement("INSERT INTO tellers (tellerid, tellername, balance, branchid, address) VALUES(?, ?, ?, ?, ?)");
+        prep.setString(2, tellername);
+        prep.setString(3, balance);
+        prep.setString(5, address);
+
+        for (int i = 1; i <= n*10; i++) {
+            prep.setInt(1, i);
+            prep.setInt(4,  ThreadLocalRandom.current().nextInt(1, n + 1));
+            prep.execute();
+        }
+        prep.close();
+        System.out.println("tellers Filled!");
     }
 
     public static void main(String[] args) {
@@ -43,6 +66,7 @@ public class Benchmark {
             clearTables(conn);
             long start = System.currentTimeMillis();
             fillBranches(conn, n);
+            fillTellers(conn,n );
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;
             System.out.println("Time: " + timeElapsed/1000.0d + "s");
