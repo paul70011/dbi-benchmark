@@ -3,7 +3,6 @@ package dbi;
 import java.sql.*;
 import java.util.Random;
 
-
 public class Benchmark {
     static final String DB_URL = "jdbc:mariadb://localhost:3306/benchmark";
     static final String USER = "root";
@@ -14,9 +13,7 @@ public class Benchmark {
     static final String str72 = "000000000000000000000000000000000000000000000000000000000000000000000000";
 
     private static int getRandomNumberInRange(int min, int max) {
-
         if (min == max) return min;
-
         Random r = new Random();
         return r.nextInt((max - min) + 1) + min;
     }
@@ -47,16 +44,12 @@ public class Benchmark {
 
     public static void fillTellers(Connection conn, int n) throws SQLException{
         System.out.println("Filling tellers table...");
-        String tellername = "00000000000";
-        String balance = "0";
-        String address = "000";
-
-
+        int balance = 0;
 
         PreparedStatement prep = conn.prepareStatement("INSERT INTO tellers (tellerid, tellername, balance, branchid, address) VALUES(?, ?, ?, ?, ?)");
-        prep.setString(2, tellername);
-        prep.setString(3, balance);
-        prep.setString(5, address);
+        prep.setString(2, str20);
+        prep.setInt(3, balance);
+        prep.setString(5, str68);
 
         for (int i = 1; i <= n*10; i++) {
             prep.setInt(1, i);
@@ -97,11 +90,8 @@ public class Benchmark {
             long start = System.currentTimeMillis();
 
             fillBranches(conn, n);
-
-            fillTellers(conn,n );
-
+            fillTellers(conn, n);
             fillAccounts(conn, n);
-
 
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;
