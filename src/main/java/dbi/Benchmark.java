@@ -8,6 +8,8 @@ public class Benchmark {
     static final String USER = "root";
     static final String PASS = "root";
 
+    static final int BATCH_SIZE = 3000;
+
     static final String str20 = "00000000000000000000";
     static final String str68 = "00000000000000000000000000000000000000000000000000000000000000000000";
     static final String str72 = "000000000000000000000000000000000000000000000000000000000000000000000000";
@@ -31,31 +33,36 @@ public class Benchmark {
     public static void fillBranches(Connection conn, int n) throws SQLException{
         System.out.println("Filling branches table...");
         PreparedStatement prep = conn.prepareStatement("INSERT INTO branches (branchid, branchname, balance, address) VALUES(?, ?, 0, ?)");
-        prep.setString(2, str20);
-        prep.setString(3, str72);
 
         for (int i = 1; i <= n; i++) {
+            prep.setString(2, str20);
+            prep.setString(3, str72);
             prep.setInt(1, i);
-            prep.execute();
+            prep.addBatch();
+            if ((i - 1) % BATCH_SIZE == 0) {
+                prep.executeBatch();
+            }
         }
+        prep.executeBatch();
         prep.close();
         System.out.println("Branches Filled!");
     }
 
     public static void fillTellers(Connection conn, int n) throws SQLException{
         System.out.println("Filling tellers table...");
-        int balance = 0;
-
-        PreparedStatement prep = conn.prepareStatement("INSERT INTO tellers (tellerid, tellername, balance, branchid, address) VALUES(?, ?, ?, ?, ?)");
-        prep.setString(2, str20);
-        prep.setInt(3, balance);
-        prep.setString(5, str68);
+        PreparedStatement prep = conn.prepareStatement("INSERT INTO tellers (tellerid, tellername, balance, branchid, address) VALUES(?, ?, 0, ?, ?)");
 
         for (int i = 1; i <= n*10; i++) {
+            prep.setString(2, str20);
+            prep.setString(4, str68);
             prep.setInt(1, i);
-            prep.setInt(4,  getRandomNumberInRange(1, n));
-            prep.execute();
+            prep.setInt(3,  getRandomNumberInRange(1, n));
+            prep.addBatch();
+            if ((i - 1) % BATCH_SIZE == 0) {
+                prep.executeBatch();
+            }
         }
+        prep.executeBatch();
         prep.close();
         System.out.println("tellers Filled!");
     }
@@ -63,13 +70,17 @@ public class Benchmark {
     public static void fillAccounts(Connection conn, int n) throws SQLException {
         System.out.println("Filling accounts table...");
         PreparedStatement prep = conn.prepareStatement("INSERT INTO accounts (accid, name, balance, branchid, address) VALUES(?, ?, 0, ?, ?)");
-        prep.setString(2, str20); // name
-        prep.setString(4, str68); // address
         for (int i = 1; i <= n * 100000; i++) {
+            prep.setString(2, str20); // name
+            prep.setString(4, str68); // address
             prep.setInt(1, i); // accid
             prep.setInt(3, getRandomNumberInRange(1, n)); // branchid
-            prep.execute();
+            prep.addBatch();
+            if ((i - 1) % BATCH_SIZE == 0) {
+                prep.executeBatch();
+            }
         }
+        prep.executeBatch();
         prep.close();
         System.out.println("Filled!");
     }
