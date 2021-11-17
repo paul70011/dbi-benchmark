@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.Random;
 
 public class Benchmark {
-    static final String DB_URL = "jdbc:mariadb://localhost:3306/benchmark";
+    static final String DB_URL = "jdbc:mariadb://localhost:3306/benchmark?rewriteBatchedStatements=true";
     static final String USER = "root";
     static final String PASS = "root";
 
