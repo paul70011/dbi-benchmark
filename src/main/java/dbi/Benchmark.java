@@ -8,7 +8,7 @@ public class Benchmark {
     static final String USER = "root";
     static final String PASS = "root";
 
-    static final int BATCH_SIZE = 3000;
+    static int BATCH_SIZE;
 
     static final String str20 = "00000000000000000000";
     static final String str68 = "00000000000000000000000000000000000000000000000000000000000000000000";
@@ -86,12 +86,14 @@ public class Benchmark {
     }
 
     public static void main(String[] args) {
-        if (args.length != 1) {
-            System.out.println("one parameter required");
+        if (args.length != 2) {
+            System.out.println("two parameter required");
             System.exit(0);
         }
         int n = Integer.parseInt(args[0]);
         System.out.println("n: " + n);
+        BATCH_SIZE = Integer.parseInt(args[1]);
+        System.out.println("batch size: " + BATCH_SIZE);
 
         System.out.println("Connecting to database...");
         try(Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);) {
