@@ -4,7 +4,6 @@ import java.sql.*;
 import java.util.Random;
 
 public class Benchmark {
-    static final String DB_URL = "jdbc:mariadb://localhost:3306/benchmark?rewriteBatchedStatements=true";
     static final String USER = "root";
     static final String PASS = "root";
 
@@ -86,14 +85,15 @@ public class Benchmark {
     }
 
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.out.println("two parameter required");
+        if (args.length != 3) {
+            System.out.println("three parameter required");
             System.exit(0);
         }
         int n = Integer.parseInt(args[0]);
         System.out.println("n: " + n);
         BATCH_SIZE = Integer.parseInt(args[1]);
         System.out.println("batch size: " + BATCH_SIZE);
+        String DB_URL = "jdbc:mariadb://" + args[2] + ":3306/benchmark?rewriteBatchedStatements=true";
 
         System.out.println("Connecting to database...");
         try(Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);) {
